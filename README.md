@@ -1,5 +1,5 @@
 # sports_social_network
-# Для запуска сайта сделай:
+Для запуска сайта сделай:
 1. Склонируй репозиторий: git clone https://github.com/kimfromsiberia/sports_social_network.git
 2. Создай и активируй виртуальное окружение
 3. Загрузи нужные библиотеки: pip install requirements.txt
