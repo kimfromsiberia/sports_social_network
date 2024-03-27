@@ -25,8 +25,6 @@ def create_app():
     
     @app.route('/', methods=['GET', 'POST'])
     def start_page():
-        if current_user.is_authenticated:
-            return 'Страница находится в разработке.'
         if request.method == 'POST':
             email = request.form['email']
             if email:
