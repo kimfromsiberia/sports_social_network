@@ -15,30 +15,30 @@
   </div>
   {% if user.date_of_birth %}
   <div class="row">
-    <div class="col-5">
+    <div class="col-6">
       <p class="fs-6">Дата рождения</p>
     </div>
-    <div class="col-4">
-      <p class="fs-6">{{ user.date_of_birth }}</p>
+    <div class="col-5">
+      <p class="fs-6">{{ user.date_of_birth.strftime('%d %B %Y') }}</p>
     </div>
   </div>
   {% endif %}
   {% if user.country %}
   <div class="row">
-    <div class="col-5">
+    <div class="col-6">
       <p class="fs-6">Страна</p>
     </div>
-    <div class="col-4">
+    <div class="col-5">
       <p class="fs-6">{{ user.country }}</p>
     </div>
   </div>
   {% endif %}
   {% if user.city %}
   <div class="row">
-    <div class="col-5">
+    <div class="col-6">
       <p class="fs-6">Город</p>
     </div>
-    <div class="col-4">
+    <div class="col-5">
       <p class="fs-6">{{ user.city }}</p>
   </div>
   </div>

@@ -73,7 +73,7 @@ def create_app():
     @app.route('/u_id<user_id>')
     @login_required
     def user_page(user_id):
-        user = User.query.filter(User.id == user_id).first()
+        user = User.query.filter(User.id == user_id).first_or_404()
         return render_template('user_page.html', user=user)
 
     @app.route('/logout')
