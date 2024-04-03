@@ -1,0 +1,37 @@
+{% extends "user_page_base.html" %}
+
+{% block title %}Настройки{% endblock %}
+{% block content %}
+<h4>Редактировать профиль</h4>
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="alert alert-primary" role="alert">
+            {{ messages[0] }}
+        </div>
+    {% endif %}
+{% endwith %}
+<form method="POST" action="{{ url_for('user_settings', user_id=current_user.id) }}">
+    <p>Имя</p>
+    <div class="form-floating mb-1">
+        <input name="name" class="form-control" value="{{ user.name }}">
+        <label>Имя</label>
+    </div>
+    <div class="form-floating mb-1">
+        <input name="last_name" class="form-control" value="{{ user.last_name }}">
+        <label>Фамилия</label>
+    </div>
+    <div class="form-floating mb-1">
+        <input name="date_of_birth" class="form-control" value="{{ user.date_of_birth.strftime('%d.%m.%Y') }}">
+        <label>Дата рождения в формате день.месяц.год</label>
+    </div>
+    <div class="form-floating mb-1">
+        <input name="country" class="form-control" value="{{ user.country }}">
+        <label>Страна</label>
+    </div>
+    <div class="form-floating mb-2">
+        <input name="city" class="form-control" value="{{ user.city }}">
+        <label>Город</label>
+    </div>
+    <button class="btn btn-primary" type="submit">Сохранить изменения</button>
+</form>
+{% endblock %}
