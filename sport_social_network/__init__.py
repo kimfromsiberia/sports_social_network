@@ -71,6 +71,10 @@ def create_app():
                 return redirect(url_for('registration'))
         return render_template('registration_page.html')
 
+    @app.route('/so_registration/', methods=['GET', 'POST'])
+    def so_registration():
+        return render_template('sport_object_reg_page.html')
+
     @app.route('/u_id<user_id>')
     @login_required
     def user_page(user_id):

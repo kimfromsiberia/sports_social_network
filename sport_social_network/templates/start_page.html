@@ -12,6 +12,7 @@
 {% endwith %}
 <h4>Вход</h4>
 <form method="POST" action="{{ url_for('start_page')  }}">
+    <div class="col-4">
     <div class="form-floating mb-3" method="POST">
         <input name="email" type="email" class="form-control form-control-lg" id="floatingInput" placeholder="name@example.com">
         <label for="floatingInput">Почта</label>
@@ -22,6 +23,9 @@
     </div>
     <button class="btn btn-primary" type="submit">Войти</button>
     <h1></h1>
+    </div>
 </form>
 <a class="btn btn-primary" href="{{ url_for('registration')  }}" role="button">Создать аккаунт</a>
+<p class="font-weight-normal mt-2 mb-1">Спортивный объект?</p>
+<a class="btn btn-primary" href="{{ url_for('so_registration')  }}" role="button">Создать аккаунт</a>
 {% endblock %}
