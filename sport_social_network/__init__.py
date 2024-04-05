@@ -1,5 +1,5 @@
 from flask import flash, Flask, redirect, request, url_for, render_template
-from flask_login import current_user, LoginManager, login_user, logout_user
+from flask_login import LoginManager, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash
 
 from sport_social_network.model import db, User
@@ -17,12 +17,10 @@ def create_app():
     login_manager.init_app(app)
     login_manager.login_view = 'start_page'
 
-    
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(user_id)
-    
-    
+
     @app.route('/', methods=['GET', 'POST'])
     def start_page():
         if request.method == 'POST':
@@ -32,7 +30,7 @@ def create_app():
                 if user:
                     if user.check_password(request.form['password']):
                         login_user(user)
-                        return 'Страница находится в разработке.'
+                        return redirect(url_for('user_page', user_id=user.id))
                     else:
                         flash('Неверный пароль')
                         return redirect(url_for('start_page'))
@@ -43,7 +41,6 @@ def create_app():
                 flash('Введите почту')
                 return redirect(url_for('start_page'))
         return render_template('start_page.html')
-
 
     @app.route('/registration/', methods=['GET', 'POST'])
     def registration():
@@ -72,13 +69,17 @@ def create_app():
                 flash('Введите почту')
                 return redirect(url_for('registration'))
         return render_template('registration_page.html')
-    
+
+    @app.route('/u_id<user_id>')
+    @login_required
+    def user_page(user_id):
+        user = User.query.filter(User.id == user_id).first_or_404()
+        return render_template('user_page.html', user=user)
 
     @app.route('/logout')
     def logout():
         logout_user()
         flash('Вы разлогинились')
         return redirect(url_for('start_page'))
-    
     
     return app
