@@ -87,14 +87,14 @@ def create_app():
         if request.method == 'POST':
             user.name = request.form['name']
             user.last_name = request.form['last_name']
-            try:
-                date = datetime.strptime(request.form['date_of_birth'], '%d.%m.%Y')
-                user.date_of_birth = date
-            except ValueError:
-                flash('Неверный формат даты')
+            if request.form['date_of_birth']:
+                try:
+                    date = datetime.strptime(request.form['date_of_birth'], '%d.%m.%Y')
+                    user.date_of_birth = date
+                except ValueError:
+                    flash('Неверный формат даты')
             user.country = request.form['country']
             user.city = request.form['city']
-            db.session.add(user)
             db.session.commit()
             flash('Изменения сохранены')
         return render_template('user_settings.html', user=user)
