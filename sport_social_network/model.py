@@ -24,3 +24,23 @@ class User(db.Model, UserMixin):
 
     def __repr__(self):
         return f'<User {self.id} {self.email}>'
+
+
+class SportObject(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String, unique=True)
+    password = db.Column(db.String)
+    name = db.Column(db.String)
+    country = db.Column(db.String)
+    city = db.Column(db.String)
+    address = db.Column(db.String)
+    phone = db.Column(db.String)
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
+
+    def __repr__(self):
+        return f'<Sport object {self.id} {self.name}>'
