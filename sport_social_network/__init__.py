@@ -1,5 +1,6 @@
+from datetime import datetime
 from flask import flash, Flask, redirect, request, url_for, render_template
-from flask_login import LoginManager, login_user, logout_user, login_required
+from flask_login import current_user, LoginManager, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash
 
 from sport_social_network.model import db, User
@@ -74,12 +75,34 @@ def create_app():
     @login_required
     def user_page(user_id):
         user = User.query.filter(User.id == user_id).first_or_404()
-        return render_template('user_page.html', user=user)
+        return render_template(
+            'user_page.html',
+            user=user
+            )
+
+    @app.route('/settings', methods=['GET', 'POST'])
+    @login_required
+    def user_settings():
+        user = User.query.filter(User.id == current_user.id).first()
+        if request.method == 'POST':
+            user.name = request.form['name']
+            user.last_name = request.form['last_name']
+            if request.form['date_of_birth']:
+                try:
+                    date = datetime.strptime(request.form['date_of_birth'], '%d.%m.%Y')
+                    user.date_of_birth = date
+                except ValueError:
+                    flash('Неверный формат даты')
+            user.country = request.form['country']
+            user.city = request.form['city']
+            db.session.commit()
+            flash('Изменения сохранены')
+        return render_template('user_settings.html', user=user)
 
     @app.route('/logout')
     def logout():
         logout_user()
         flash('Вы разлогинились')
         return redirect(url_for('start_page'))
-    
+
     return app
