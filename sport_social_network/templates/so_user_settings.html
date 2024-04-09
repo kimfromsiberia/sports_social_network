@@ -1,0 +1,53 @@
+{% extends "user_page_base.html" %}
+
+{% block title %}Настройки{% endblock %}
+{% block content %}
+<h4>Редактировать профиль</h4>
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="alert alert-primary" role="alert">
+            {{ messages[0] }}
+        </div>
+    {% endif %}
+{% endwith %}
+<form method="POST" action="{{ url_for('user_settings', user_id=current_user.id) }}">
+    <p>Имя</p>
+    <div class="form-floating mb-1">
+        {% if user.name %}
+        <input name="name" class="form-control" value="{{ user.name }}">
+        <label>Имя</label>
+        {% else %}
+        <input name="name" class="form-control">
+        <label>Имя</label>
+        {% endif %}
+    </div>
+    <div class="form-floating mb-1">
+        {% if user.country %}
+        <input name="country" class="form-control" value="{{ user.country }}">
+        <label>Страна</label>
+        {% else %}
+        <input name="country" class="form-control">
+        <label>Страна</label>
+        {% endif %}
+    </div>
+    <div class="form-floating mb-2">
+        {% if user.city %}
+        <input name="city" class="form-control" value="{{ user.city }}">
+        <label>Город</label>
+        {% else %}
+        <input name="city" class="form-control">
+        <label>Город</label>
+        {% endif %}
+    </div>
+    <div class="form-floating mb-2">
+        {% if user.address %}
+        <input name="address" class="form-control" value="{{ user.address }}">
+        <label>Адрес</label>
+        {% else %}
+        <input name="address" class="form-control">
+        <label>Адрес</label>
+        {% endif %}
+    </div>
+    <button class="btn btn-primary" type="submit">Сохранить изменения</button>
+</form>
+{% endblock %}
