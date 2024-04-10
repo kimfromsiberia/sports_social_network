@@ -43,6 +43,7 @@ class SportObject(User):
     country = db.Column(db.String)
     city = db.Column(db.String)
     address = db.Column(db.String)
+    phone = db.Column(db.String)
     user = db.relationship('User', uselist=False, back_populates='sport_object')
 
     def __repr__(self):

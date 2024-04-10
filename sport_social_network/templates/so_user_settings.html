@@ -15,10 +15,10 @@
     <div class="form-floating mb-1">
         {% if user.name %}
         <input name="name" class="form-control" value="{{ user.name }}">
-        <label>Имя</label>
+        <label>Название</label>
         {% else %}
         <input name="name" class="form-control">
-        <label>Имя</label>
+        <label>Название</label>
         {% endif %}
     </div>
     <div class="form-floating mb-1">
@@ -46,6 +46,15 @@
         {% else %}
         <input name="address" class="form-control">
         <label>Адрес</label>
+        {% endif %}
+    </div>
+    <div class="form-floating mb-2">
+        {% if user.phone %}
+        <input name="phone" class="form-control" value="{{ user.phone }}">
+        <label>Телефон</label>
+        {% else %}
+        <input name="phone" class="form-control">
+        <label>Телефон</label>
         {% endif %}
     </div>
     <button class="btn btn-primary" type="submit">Сохранить изменения</button>

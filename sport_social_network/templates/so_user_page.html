@@ -40,5 +40,15 @@
   </div>
   </div>
   {% endif %}
+  {% if user.phone %}
+  <div class="row">
+    <div class="col-6">
+      <p class="fs-6">Телефон</p>
+    </div>
+    <div class="col-5">
+      <p class="fs-6">{{ user.phone }}</p>
+  </div>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

@@ -48,8 +48,8 @@ def create_app():
         if request.method == 'POST':
             email = request.form['email']
             if email:
-                user = Person.query.filter(Person.email == email).first()
-                if user:
+                person = Person.query.filter(Person.email == email).first()
+                if person:
                     flash('Пользователь с такой почтой уже существует')
                     return redirect(url_for('registration'))
                 else:
@@ -59,9 +59,10 @@ def create_app():
                             return redirect(url_for('registration'))
                         else:
                             password = generate_password_hash(request.form['password'])
-                            new_user = Person(email=email, password=password, user_type='person')
-                            db.session.add(new_user)
+                            new_person = Person(email=email, password=password, user_type='person')
+                            db.session.add(new_person)
                             db.session.commit()
+                            flash('Вы успешно зарегистрировались.')
                             return redirect(url_for('start_page'))
                     else:
                         flash('Введите пароль')
@@ -76,8 +77,8 @@ def create_app():
         if request.method == 'POST':
             email = request.form['email']
             if email:
-                user = SportObject.query.filter(SportObject.email == email).first()
-                if user:
+                sport_object = SportObject.query.filter(SportObject.email == email).first()
+                if sport_object:
                     flash('Пользователь с такой почтой уже существует')
                     return redirect(url_for('so_registration'))
                 else:
@@ -87,9 +88,10 @@ def create_app():
                             return redirect(url_for('so_registration'))
                         else:
                             password = generate_password_hash(request.form['password'])
-                            new_user = SportObject(email=email, password=password, user_type='sport_object')
-                            db.session.add(new_user)
+                            new_sport_object = SportObject(email=email, password=password, user_type='sport_object')
+                            db.session.add(new_sport_object)
                             db.session.commit()
+                            flash('Вы успешно зарегистрировались.')
                             return redirect(url_for('start_page'))
                     else:
                         flash('Введите пароль')
@@ -141,11 +143,13 @@ def create_app():
                 user.country = request.form['country']
                 user.city = request.form['city']
                 user.address = request.form['address']
+                user.phone = request.form['phone']
                 db.session.commit()
                 flash('Изменения сохранены')
             return render_template('so_user_settings.html', user=user)
 
     @app.route('/logout')
+    @login_required
     def logout():
         logout_user()
         flash('Вы разлогинились')
