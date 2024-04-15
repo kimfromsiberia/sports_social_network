@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Добро пожаловать!{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="alert alert-primary" role="alert">
+    {{ messages[0] }}
+</div>
+{% endif %}
+{% endwith %}
+<h4>Создать аккаунт</h4>
+<form method="POST" action="{{ url_for('so_registration')  }}">
+    <div class="form-floating mb-3">
+        <input name="email" type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
+        <label for="floatingInput">Почта</label>
+    </div>
+    <div class="form-floating mb-3">
+        <input name="password" type="password" class="form-control" id="floatingPassword" placeholder="Password">
+        <label for="floatingPassword">Пароль</label>
+    </div>
+    <div class="form-floating mb-3">
+        <input name="repeat_password" type="password" class="form-control" id="floatingPassword" placeholder="Password">
+        <label for="floatingPassword">Повторите пароль</label>
+    </div>
+    <button class="btn btn-primary" type="submit">Продолжить</button>
+</form>
+{% endblock %}

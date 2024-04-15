@@ -1,0 +1,54 @@
+{% extends "user_page_base.html" %}
+
+{% block title %}Добро пожаловать!{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <p class="fs-3">
+      {% if user.name %}
+        {{ user.name }} 
+      {% endif %}
+    </p>
+  </div>
+  {% if user.country %}
+  <div class="row">
+    <div class="col-6">
+      <p class="fs-6">Страна</p>
+    </div>
+    <div class="col-5">
+      <p class="fs-6">{{ user.country }}</p>
+    </div>
+  </div>
+  {% endif %}
+  {% if user.city %}
+  <div class="row">
+    <div class="col-6">
+      <p class="fs-6">Город</p>
+    </div>
+    <div class="col-5">
+      <p class="fs-6">{{ user.city }}</p>
+  </div>
+  </div>
+  {% endif %}
+  {% if user.address %}
+  <div class="row">
+    <div class="col-6">
+      <p class="fs-6">Адрес</p>
+    </div>
+    <div class="col-5">
+      <p class="fs-6">{{ user.address }}</p>
+  </div>
+  </div>
+  {% endif %}
+  {% if user.phone %}
+  <div class="row">
+    <div class="col-6">
+      <p class="fs-6">Телефон</p>
+    </div>
+    <div class="col-5">
+      <p class="fs-6">{{ user.phone }}</p>
+  </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
