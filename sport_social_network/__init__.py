@@ -3,6 +3,7 @@ from flask import flash, Flask, redirect, request, url_for, render_template
 from flask_login import current_user, LoginManager, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash
 
+from sport_social_network.forms import SignInForm, SignUpForm
 from sport_social_network.model import db, User, Person, SportObject
 
 
@@ -24,41 +25,33 @@ def create_app():
 
     @app.route('/', methods=['GET', 'POST'])
     def start_page():
-        if request.method == 'POST':
-            email = request.form['email']
-            if email:
-                user = User.query.filter(User.email == email).first()
-                if user:
-                    if user.check_password(request.form['password']):
-                        login_user(user)
-                        return redirect(url_for('user_page', user_id=user.id))
-                    else:
-                        flash('Неверный пароль')
-                        return redirect(url_for('start_page'))
-                else:
-                    flash('Пользователя с такой почтой не существует')
-                    return redirect(url_for('start_page'))
-            else:
-                flash('Введите почту')
-                return redirect(url_for('start_page'))
-        return render_template('start_page.html')
+        if current_user.is_authenticated:
+            return redirect((url_for('user_page', user_id=current_user.id)))
+        form = SignInForm()
+        if form.validate_on_submit:
+            user = User.query.filter(User.email == form.email.data).first()
+            if user and user.check_password(form.password.data):
+                login_user(user)
+                return redirect(url_for('user_page', user_id=user.id))
+        return render_template('start_page.html', form=form)
 
     @app.route('/registration/', methods=['GET', 'POST'])
     def registration():
-        if request.method == 'POST':
-            email = request.form['email']
+        form = SignUpForm()
+        if form.validate_on_submit:
+            email = form.email.data
             if email:
-                person = Person.query.filter(Person.email == email).first()
+                person = User.query.filter(User.email == email).first()
                 if person:
                     flash('Пользователь с такой почтой уже существует')
                     return redirect(url_for('registration'))
                 else:
-                    if request.form['password'] and request.form['repeat_password']:
-                        if request.form['password'] != request.form['repeat_password']:
+                    if form.password.data and form.confirm_password.data:
+                        if form.password.data != form.confirm_password.data:
                             flash('Введённые пароли не совпадают')
                             return redirect(url_for('registration'))
                         else:
-                            password = generate_password_hash(request.form['password'])
+                            password = generate_password_hash(form.password.data)
                             new_person = Person(email=email, password=password, user_type='person')
                             db.session.add(new_person)
                             db.session.commit()
@@ -67,27 +60,25 @@ def create_app():
                     else:
                         flash('Введите пароль')
                         return redirect(url_for('registration'))
-            else:
-                flash('Введите почту')
-                return redirect(url_for('registration'))
-        return render_template('registration_page.html')
+        return render_template('registration_page.html', form=form)
 
     @app.route('/so_registration/', methods=['GET', 'POST'])
     def so_registration():
-        if request.method == 'POST':
-            email = request.form['email']
+        form = SignUpForm()
+        if form.validate_on_submit:
+            email = form.email.data
             if email:
-                sport_object = SportObject.query.filter(SportObject.email == email).first()
+                sport_object = User.query.filter(User.email == email).first()
                 if sport_object:
                     flash('Пользователь с такой почтой уже существует')
                     return redirect(url_for('so_registration'))
                 else:
-                    if request.form['password'] and request.form['repeat_password']:
-                        if request.form['password'] != request.form['repeat_password']:
+                    if form.password.data and form.confirm_password.data:
+                        if form.password.data != form.confirm_password.data:
                             flash('Введённые пароли не совпадают')
                             return redirect(url_for('so_registration'))
                         else:
-                            password = generate_password_hash(request.form['password'])
+                            password = generate_password_hash(form.password.data)
                             new_sport_object = SportObject(email=email, password=password, user_type='sport_object')
                             db.session.add(new_sport_object)
                             db.session.commit()
@@ -96,10 +87,7 @@ def create_app():
                     else:
                         flash('Введите пароль')
                         return redirect(url_for('so_registration'))
-            else:
-                flash('Введите почту')
-                return redirect(url_for('so_registration'))
-        return render_template('so_registration_page.html')
+        return render_template('so_registration_page.html', form=form)
 
     @app.route('/u_id<user_id>')
     @login_required

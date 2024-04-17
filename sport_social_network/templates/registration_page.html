@@ -12,18 +12,18 @@
 {% endwith %}
 <h4>Создать аккаунт</h4>
 <form method="POST" action="{{ url_for('registration')  }}">
-    <div class="form-floating mb-3">
-        <input name="email" type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
-        <label for="floatingInput">Почта</label>
+    <div class="form-floating mb-3" method="POST">
+        {{ form.email(class="form-control form-control-lg", id="floatingInput", placeholder="") }}
+        <label for="floatingInput">email</label>
     </div>
     <div class="form-floating mb-3">
-        <input name="password" type="password" class="form-control" id="floatingPassword" placeholder="Password">
+        {{ form.password(class="form-control form-control-lg", id="floatingPassword", placeholder="") }}
         <label for="floatingPassword">Пароль</label>
     </div>
     <div class="form-floating mb-3">
-        <input name="repeat_password" type="password" class="form-control" id="floatingPassword" placeholder="Password">
+        {{ form.confirm_password(class="form-control form-control-lg", id="floatingPassword", placeholder="") }}
         <label for="floatingPassword">Повторите пароль</label>
     </div>
-    <button class="btn btn-primary" type="submit">Продолжить</button>
+    {{form.submit(class="btn btn-primary", type="submit")}}
 </form>
 {% endblock %}
