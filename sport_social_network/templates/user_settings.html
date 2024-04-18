@@ -11,52 +11,71 @@
     {% endif %}
 {% endwith %}
 <form method="POST" action="{{ url_for('user_settings', user_id=current_user.id) }}">
-    <p>Имя</p>
     <div class="form-floating mb-1">
         {% if user.name %}
-        <input name="name" class="form-control" value="{{ user.name }}">
-        <label>Имя</label>
+        <div class="form-floating mb-3">
+            {{ form.name(class="form-control form-control-lg", id="floatingInput", placeholder="", value=user.name) }}
+            <label for="floatingInput">Имя</label>
+        </div>
         {% else %}
-        <input name="name" class="form-control">
-        <label>Имя</label>
+        <div class="form-floating mb-3">
+            {{ form.name(class="form-control form-control-lg", id="floatingInput", placeholder="") }}
+            <label for="floatingInput">Имя</label>
+        </div>
         {% endif %}
     </div>
     <div class="form-floating mb-1">
         {% if user.last_name %}
-        <input name="last_name" class="form-control" value="{{ user.last_name }}">
-        <label>Фамилия</label>
+        <div class="form-floating mb-3">
+            {{ form.last_name(class="form-control form-control-lg", id="floatingInput", placeholder="", value=user.last_name) }}
+            <label for="floatingInput">Фамилия</label>
+        </div>
         {% else %}
-        <input name="last_name" class="form-control">
-        <label>Фамилия</label>
+        <div class="form-floating mb-3">
+            {{ form.last_name(class="form-control form-control-lg", id="floatingInput", placeholder="") }}
+            <label for="floatingInput">Фамилия</label>
+        </div>
         {% endif %}
     </div>
     <div class="form-floating mb-1">
         {% if user.date_of_birth %}
-        <input name="date_of_birth" class="form-control" value="{{ user.date_of_birth.strftime('%d.%m.%Y') }}">
-        <label>Дата рождения в формате день.месяц.год</label>
+        <div class="form-floating mb-3">
+            {{ form.date_of_birth(class="form-control form-control-lg", id="floatingInput", placeholder="", value=user.date_of_birth.strftime('%d.%m.%Y')) }}
+            <label for="floatingInput">Дата рождения</label>
+        </div>
         {% else %}
-        <input name="date_of_birth" class="form-control">
-        <label>Дата рождения в формате день.месяц.год</label>
+        <div class="form-floating mb-3">
+            {{ form.date_of_birth(class="form-control form-control-lg", id="floatingInput", placeholder="") }}
+            <label for="floatingInput">Дата рождения</label>
+        </div>
         {% endif %}
     </div>
     <div class="form-floating mb-1">
         {% if user.country %}
-        <input name="country" class="form-control" value="{{ user.country }}">
-        <label>Страна</label>
+        <div class="form-floating mb-3">
+            {{ form.country(class="form-control form-control-lg", id="floatingInput", placeholder="", value=user.country) }}
+            <label for="floatingInput">Страна</label>
+        </div>
         {% else %}
-        <input name="country" class="form-control">
-        <label>Страна</label>
+        <div class="form-floating mb-3">
+            {{ form.country(class="form-control form-control-lg", id="floatingInput", placeholder="") }}
+            <label for="floatingInput">Страна</label>
+        </div>
         {% endif %}
     </div>
     <div class="form-floating mb-2">
         {% if user.city %}
-        <input name="city" class="form-control" value="{{ user.city }}">
-        <label>Город</label>
+        <div class="form-floating mb-3">
+            {{ form.city(class="form-control form-control-lg", id="floatingInput", placeholder="", value=user.city) }}
+            <label for="floatingInput">Город</label>
+        </div>
         {% else %}
-        <input name="city" class="form-control">
-        <label>Город</label>
+        <div class="form-floating mb-3">
+            {{ form.city(class="form-control form-control-lg", id="floatingInput", placeholder="") }}
+            <label for="floatingInput">Город</label>
+        </div>
         {% endif %}
     </div>
-    <button class="btn btn-primary" type="submit">Сохранить изменения</button>
+    {{form.submit(class="btn btn-primary", type="submit")}}
 </form>
 {% endblock %}

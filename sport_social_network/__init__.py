@@ -3,7 +3,7 @@ from flask import flash, Flask, redirect, request, url_for, render_template
 from flask_login import current_user, LoginManager, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash
 
-from sport_social_network.forms import SignInForm, SignUpForm
+from sport_social_network.forms import SignInForm, SignUpForm, PersonSettingsForm, SportObjectSettingsForm
 from sport_social_network.model import db, User, Person, SportObject
 
 
@@ -109,32 +109,34 @@ def create_app():
     @login_required
     def user_settings():
         if User.query.filter(User.id == current_user.id).first().user_type == 'person':
+            form = PersonSettingsForm()
             user = Person.query.filter(Person.id == current_user.id).first()
-            if request.method == 'POST':
-                user.name = request.form['name']
-                user.last_name = request.form['last_name']
-                if request.form['date_of_birth']:
+            if form.is_submitted():
+                user.name = form.name.data
+                user.last_name = form.last_name.data
+                if form.date_of_birth.data:
                     try:
-                        date = datetime.strptime(request.form['date_of_birth'], '%d.%m.%Y')
+                        date = datetime.strptime(form.date_of_birth.data, '%d.%m.%Y')
                         user.date_of_birth = date
                     except ValueError:
                         flash('Неверный формат даты')
-                user.country = request.form['country']
-                user.city = request.form['city']
+                user.country = form.country.data
+                user.city = form.city.data
                 db.session.commit()
                 flash('Изменения сохранены')
-            return render_template('user_settings.html', user=user)
+            return render_template('user_settings.html', user=user, form=form)
         else:
+            form = SportObjectSettingsForm()
             user = SportObject.query.filter(SportObject.id == current_user.id).first()
-            if request.method == 'POST':
-                user.name = request.form['name']
-                user.country = request.form['country']
-                user.city = request.form['city']
-                user.address = request.form['address']
-                user.phone = request.form['phone']
+            if form.is_submitted():
+                user.name = form.name.data
+                user.country = form.country.data
+                user.city = form.city.data
+                user.address = form.address.data
+                user.phone = form.phone.data
                 db.session.commit()
                 flash('Изменения сохранены')
-            return render_template('so_user_settings.html', user=user)
+            return render_template('so_user_settings.html', user=user, form=form)
 
     @app.route('/logout')
     @login_required
