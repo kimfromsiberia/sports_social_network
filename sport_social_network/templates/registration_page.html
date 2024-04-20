@@ -12,6 +12,7 @@
 {% endwith %}
 <h4>Создать аккаунт</h4>
 <form method="POST" action="{{ url_for('registration')  }}">
+    {{form.hidden_tag()}}
     <div class="form-floating mb-3" method="POST">
         {{ form.email(class="form-control form-control-lg", id="floatingInput", placeholder="") }}
         <label for="floatingInput">email</label>

@@ -11,6 +11,7 @@
     {% endif %}
 {% endwith %}
 <form method="POST" action="{{ url_for('user_settings', user_id=current_user.id) }}">
+    {{form.hidden_tag()}}
     <div class="form-floating mb-1">
         {% if user.name %}
         <div class="form-floating mb-3">
