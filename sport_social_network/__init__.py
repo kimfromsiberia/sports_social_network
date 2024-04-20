@@ -4,7 +4,7 @@ from flask_login import current_user, LoginManager, login_user, logout_user, log
 from werkzeug.security import generate_password_hash
 
 from sport_social_network.forms import SignInForm, SignUpForm, PersonSettingsForm, SportObjectSettingsForm
-from sport_social_network.model import db, User, Person, SportObject
+from sport_social_network.model import db, User, Person, SportObject, friends
 
 
 def create_app():
@@ -89,21 +89,43 @@ def create_app():
                         return redirect(url_for('so_registration'))
         return render_template('so_registration_page.html', form=form)
 
-    @app.route('/u_id<user_id>')
+    @app.route('/u_id<user_id>', methods=['GET', 'POST'])
     @login_required
     def user_page(user_id):
-        if User.query.filter(User.id == user_id).first().user_type == 'person':
-            user = Person.query.filter(Person.id == user_id).first_or_404()
-            return render_template(
-                'user_page.html',
-                user=user
-                )
-        else:
-            user = SportObject.query.filter(SportObject.id == user_id).first_or_404()
-            return render_template(
-                'so_user_page.html',
-                user=user
-                )
+        try:
+            if User.query.filter(User.id == user_id).first().user_type == 'person':
+                guest_friends_list = [friend[1] for friend in db.session.query(friends).filter(friends.c.sender_id == user_id)]
+                current_user_friends_list = [friend[1] for friend in db.session.query(friends).filter(friends.c.sender_id == current_user.id)]
+                if int(user_id) in current_user_friends_list:
+                    person_in_friends = True
+                else:
+                    person_in_friends = False
+                print(person_in_friends)
+                user = Person.query.filter(Person.id == user_id).first_or_404()
+                if request.method == 'POST':
+                    if request.form['add_friend_button']:
+                        if int(user_id) not in current_user_friends_list:
+                            flash('Пользователь добавлен в друзья')
+                            friend = Person.query.filter(Person.id == current_user.id).first()
+                            sender = Person.query.filter(Person.id == user_id).first()
+                            friend.followed.append(sender)
+                            db.session.commit()
+                return render_template(
+                    'user_page.html',
+                    user=user,
+                    friends_list=guest_friends_list,
+                    user_id=user_id,
+                    person_in_friends=person_in_friends
+                    )
+            else:
+                user = SportObject.query.filter(SportObject.id == user_id).first_or_404()
+                return render_template(
+                    'so_user_page.html',
+                    user=user
+                    )
+        except:
+            flash('Пользователя не существует')
+            return redirect(url_for('start_page'))
 
     @app.route('/settings', methods=['GET', 'POST'])
     @login_required
@@ -137,6 +159,14 @@ def create_app():
                 db.session.commit()
                 flash('Изменения сохранены')
             return render_template('so_user_settings.html', user=user, form=form)
+
+    @app.route('/u_id<user_id>/friends/', methods=['GET', 'POST'])
+    def person_friends(user_id):
+        friends_list = [user[1] for user in db.session.query(friends).filter(friends.c.sender_id == current_user.id)]
+        friends_email = []
+        for friend_id in friends_list:
+            friends_email.append(db.session.query(Person.email).filter(Person.id == friend_id).first()[0])
+        return render_template('friends.html', friends_email=friends_email, user_id=user_id)
 
     @app.route('/logout')
     @login_required

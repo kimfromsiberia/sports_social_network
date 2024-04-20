@@ -5,6 +5,13 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
+friends = db.Table(
+    'friends',
+    db.Column('sender_id', db.Integer, db.ForeignKey('person.id')),
+    db.Column('recipient_id', db.Integer, db.ForeignKey('person.id'))
+    )
+
+
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String, unique=True)
@@ -32,6 +39,14 @@ class Person(User):
     country = db.Column(db.String)
     city = db.Column(db.String)
     user = db.relationship('User', uselist=False, back_populates='person')
+    followed = db.relationship(
+        'Person',
+        secondary=friends,
+        primaryjoin=(friends.c.sender_id == id),
+        secondaryjoin=(friends.c.recipient_id == id),
+        backref=db.backref('friends', lazy='dynamic'),
+        lazy='dynamic'
+        )
 
     def __repr__(self):
         return f'<Person {self.id} {self.user.email}>'
@@ -48,3 +63,4 @@ class SportObject(User):
 
     def __repr__(self):
         return f'<Sport object {self.id} {self.user.email}>'
+
