@@ -32,7 +32,18 @@ def create_app():
             user = User.query.filter(User.email == form.email.data).first()
             if user and user.check_password(form.password.data):
                 login_user(user)
-                return redirect(url_for('user_page', user_id=user.id))
+                if user.user_type == 'person':
+                    if Person.query.filter(Person.id == user.id).first().name:
+                        return redirect(url_for('user_page', user_id=user.id))
+                    else:
+                        flash('Заполните свои данные')
+                        return redirect(url_for('user_settings', user_id=user.id))
+                else:
+                    if SportObject.query.filter(SportObject.id == user.id).first().name:
+                        return redirect(url_for('user_page', user_id=user.id))
+                    else:
+                        flash('Заполните свои данные')
+                        return redirect(url_for('user_settings', user_id=user.id))
             else:
                 flash('Неправильная почта или пароль')
         return render_template('start_page.html', form=form)
@@ -94,7 +105,6 @@ def create_app():
                     person_in_friends = True
                 else:
                     person_in_friends = False
-                print(person_in_friends)
                 user = Person.query.filter(Person.id == user_id).first_or_404()
                 if request.method == 'POST':
                     if request.form['add_friend_button']:
