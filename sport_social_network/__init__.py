@@ -5,6 +5,11 @@ from werkzeug.security import generate_password_hash
 
 from sport_social_network.forms import SignInForm, SignUpForm, PersonSettingsForm, SportObjectSettingsForm
 from sport_social_network.model import db, User, Person, SportObject, friends
+from sport_social_network.units import (get_guest_friends_list,
+                                        get_current_user_friends_list,
+                                        check_person_in_friends,
+                                        add_user_in_friends,
+                                        )
 
 
 def create_app():
@@ -32,6 +37,18 @@ def create_app():
             user = User.query.filter(User.email == form.email.data).first()
             if user and user.check_password(form.password.data):
                 login_user(user)
+                if user.user_type == 'person':
+                    if Person.query.filter(Person.id == user.id).first().name:
+                        return redirect(url_for('user_page', user_id=user.id))
+                    else:
+                        flash('Заполните свои данные')
+                        return redirect(url_for('user_settings', user_id=user.id))
+                else:
+                    if SportObject.query.filter(SportObject.id == user.id).first().name:
+                        return redirect(url_for('user_page', user_id=user.id))
+                    else:
+                        flash('Заполните свои данные')
+                        return redirect(url_for('user_settings', user_id=user.id))
                 if user.user_type == 'person':
                     if Person.query.filter(Person.id == user.id).first().name:
                         return redirect(url_for('user_page', user_id=user.id))
@@ -99,21 +116,14 @@ def create_app():
     def user_page(user_id):
         try:
             if User.query.filter(User.id == user_id).first().user_type == 'person':
-                guest_friends_list = [friend[1] for friend in db.session.query(friends).filter(friends.c.sender_id == user_id)]
-                current_user_friends_list = [friend[1] for friend in db.session.query(friends).filter(friends.c.sender_id == current_user.id)]
-                if int(user_id) in current_user_friends_list:
-                    person_in_friends = True
-                else:
-                    person_in_friends = False
-                user = Person.query.filter(Person.id == user_id).first_or_404()
+                user = Person.query.filter(Person.id == user_id).first()
+                guest_friends_list = get_guest_friends_list(friends, user_id)
+                current_user_friends_list = get_current_user_friends_list(friends, current_user)
+                person_in_friends = check_person_in_friends(user_id, current_user_friends_list)
                 if request.method == 'POST':
                     if request.form['add_friend_button']:
-                        if int(user_id) not in current_user_friends_list:
-                            flash('Пользователь добавлен в друзья')
-                            friend = Person.query.filter(Person.id == current_user.id).first()
-                            sender = Person.query.filter(Person.id == user_id).first()
-                            friend.followed.append(sender)
-                            db.session.commit()
+                        person_in_friends = True
+                        flash(add_user_in_friends(user_id, current_user, current_user_friends_list))
                 return render_template(
                     'user_page.html',
                     user=user,
@@ -122,12 +132,12 @@ def create_app():
                     person_in_friends=person_in_friends
                     )
             else:
-                user = SportObject.query.filter(SportObject.id == user_id).first_or_404()
+                user = SportObject.query.filter(SportObject.id == user_id).first()
                 return render_template(
                     'so_user_page.html',
                     user=user
                     )
-        except:
+        except AttributeError:
             flash('Пользователя не существует')
             return redirect(url_for('start_page'))
 
