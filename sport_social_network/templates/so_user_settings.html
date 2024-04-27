@@ -11,52 +11,72 @@
     {% endif %}
 {% endwith %}
 <form method="POST" action="{{ url_for('user_settings', user_id=current_user.id) }}">
-    <p>Имя</p>
+    {{form.hidden_tag()}}
     <div class="form-floating mb-1">
         {% if user.name %}
-        <input name="name" class="form-control" value="{{ user.name }}">
-        <label>Название</label>
+        <div class="form-floating mb-3">
+            {{ form.name(class="form-control form-control-lg", id="floatingInput", placeholder="", value=user.name) }}
+            <label for="floatingInput">Название</label>
+        </div>
         {% else %}
-        <input name="name" class="form-control">
-        <label>Название</label>
+        <div class="form-floating mb-3">
+            {{ form.name(class="form-control form-control-lg", id="floatingInput", placeholder="") }}
+            <label for="floatingInput">Название</label>
+        </div>
         {% endif %}
     </div>
     <div class="form-floating mb-1">
         {% if user.country %}
-        <input name="country" class="form-control" value="{{ user.country }}">
-        <label>Страна</label>
+        <div class="form-floating mb-3">
+            {{ form.country(class="form-control form-control-lg", id="floatingInput", placeholder="", value=user.country) }}
+            <label for="floatingInput">Страна</label>
+        </div>
         {% else %}
-        <input name="country" class="form-control">
-        <label>Страна</label>
+        <div class="form-floating mb-3">
+            {{ form.country(class="form-control form-control-lg", id="floatingInput", placeholder="") }}
+            <label for="floatingInput">Страна</label>
+        </div>
         {% endif %}
     </div>
     <div class="form-floating mb-2">
         {% if user.city %}
-        <input name="city" class="form-control" value="{{ user.city }}">
-        <label>Город</label>
+        <div class="form-floating mb-3">
+            {{ form.city(class="form-control form-control-lg", id="floatingInput", placeholder="", value=user.city) }}
+            <label for="floatingInput">Город</label>
+        </div>
         {% else %}
-        <input name="city" class="form-control">
-        <label>Город</label>
+        <div class="form-floating mb-3">
+            {{ form.city(class="form-control form-control-lg", id="floatingInput", placeholder="") }}
+            <label for="floatingInput">Город</label>
+        </div>
         {% endif %}
     </div>
     <div class="form-floating mb-2">
         {% if user.address %}
-        <input name="address" class="form-control" value="{{ user.address }}">
-        <label>Адрес</label>
+        <div class="form-floating mb-3">
+            {{ form.address(class="form-control form-control-lg", id="floatingInput", placeholder="", value=user.address) }}
+            <label for="floatingInput">Адрес</label>
+        </div>
         {% else %}
-        <input name="address" class="form-control">
-        <label>Адрес</label>
+        <div class="form-floating mb-3">
+            {{ form.address(class="form-control form-control-lg", id="floatingInput", placeholder="") }}
+            <label for="floatingInput">Адрес</label>
+        </div>
         {% endif %}
     </div>
     <div class="form-floating mb-2">
         {% if user.phone %}
-        <input name="phone" class="form-control" value="{{ user.phone }}">
-        <label>Телефон</label>
+        <div class="form-floating mb-3">
+            {{ form.phone(class="form-control form-control-lg", id="floatingInput", placeholder="", value=user.phone) }}
+            <label for="floatingInput">Телефон</label>
+        </div>
         {% else %}
-        <input name="phone" class="form-control">
-        <label>Телефон</label>
+        <div class="form-floating mb-3">
+            {{ form.phone(class="form-control form-control-lg", id="floatingInput", placeholder="") }}
+            <label for="floatingInput">Телефон</label>
+        </div>
         {% endif %}
     </div>
-    <button class="btn btn-primary" type="submit">Сохранить изменения</button>
+    {{form.submit(class="btn btn-primary", type="submit")}}
 </form>
 {% endblock %}

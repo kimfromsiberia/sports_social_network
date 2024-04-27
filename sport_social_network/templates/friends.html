@@ -1,0 +1,15 @@
+{% extends "user_page_base.html" %}
+
+{% block title %}Добро пожаловать!{% endblock %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="alert alert-primary" role="alert">
+    {{ messages[0] }}
+</div>
+{% endif %}
+{% endwith %}
+{% for email in friends_email %}
+    <p>{{ email }}</p>
+{% endfor %}
+{% endblock %}

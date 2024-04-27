@@ -3,7 +3,8 @@ from flask import flash, Flask, redirect, request, url_for, render_template
 from flask_login import current_user, LoginManager, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash
 
-from sport_social_network.model import db, User, Person, SportObject
+from sport_social_network.forms import SignInForm, SignUpForm, PersonSettingsForm, SportObjectSettingsForm
+from sport_social_network.model import db, User, Person, SportObject, friends
 
 
 def create_app():
@@ -24,129 +25,152 @@ def create_app():
 
     @app.route('/', methods=['GET', 'POST'])
     def start_page():
-        if request.method == 'POST':
-            email = request.form['email']
-            if email:
-                user = User.query.filter(User.email == email).first()
-                if user:
-                    if user.check_password(request.form['password']):
-                        login_user(user)
+        if current_user.is_authenticated:
+            return redirect((url_for('user_page', user_id=current_user.id)))
+        form = SignInForm()
+        if form.validate_on_submit():
+            user = User.query.filter(User.email == form.email.data).first()
+            if user and user.check_password(form.password.data):
+                login_user(user)
+                if user.user_type == 'person':
+                    if Person.query.filter(Person.id == user.id).first().name:
                         return redirect(url_for('user_page', user_id=user.id))
                     else:
-                        flash('Неверный пароль')
-                        return redirect(url_for('start_page'))
+                        flash('Заполните свои данные')
+                        return redirect(url_for('user_settings', user_id=user.id))
                 else:
-                    flash('Пользователя с такой почтой не существует')
-                    return redirect(url_for('start_page'))
+                    if SportObject.query.filter(SportObject.id == user.id).first().name:
+                        return redirect(url_for('user_page', user_id=user.id))
+                    else:
+                        flash('Заполните свои данные')
+                        return redirect(url_for('user_settings', user_id=user.id))
             else:
-                flash('Введите почту')
-                return redirect(url_for('start_page'))
-        return render_template('start_page.html')
+                flash('Неправильная почта или пароль')
+        return render_template('start_page.html', form=form)
 
     @app.route('/registration/', methods=['GET', 'POST'])
     def registration():
-        if request.method == 'POST':
-            email = request.form['email']
+        form = SignUpForm()
+        if form.validate_on_submit():
+            email = form.email.data
             if email:
-                person = Person.query.filter(Person.email == email).first()
+                person = User.query.filter(User.email == email).first()
                 if person:
                     flash('Пользователь с такой почтой уже существует')
                     return redirect(url_for('registration'))
                 else:
-                    if request.form['password'] and request.form['repeat_password']:
-                        if request.form['password'] != request.form['repeat_password']:
-                            flash('Введённые пароли не совпадают')
-                            return redirect(url_for('registration'))
-                        else:
-                            password = generate_password_hash(request.form['password'])
-                            new_person = Person(email=email, password=password, user_type='person')
-                            db.session.add(new_person)
-                            db.session.commit()
-                            flash('Вы успешно зарегистрировались.')
-                            return redirect(url_for('start_page'))
-                    else:
-                        flash('Введите пароль')
+                    if form.password.data != form.confirm_password.data:
+                        flash('Введённые пароли не совпадают')
                         return redirect(url_for('registration'))
-            else:
-                flash('Введите почту')
-                return redirect(url_for('registration'))
-        return render_template('registration_page.html')
+                    else:
+                        password = generate_password_hash(form.password.data)
+                        new_person = Person(email=email, password=password, user_type='person')
+                        db.session.add(new_person)
+                        db.session.commit()
+                        flash('Вы успешно зарегистрировались.')
+                        return redirect(url_for('start_page'))
+        return render_template('registration_page.html', form=form)
 
     @app.route('/so_registration/', methods=['GET', 'POST'])
     def so_registration():
-        if request.method == 'POST':
-            email = request.form['email']
+        form = SignUpForm()
+        if form.validate_on_submit():
+            email = form.email.data
             if email:
-                sport_object = SportObject.query.filter(SportObject.email == email).first()
+                sport_object = User.query.filter(User.email == email).first()
                 if sport_object:
                     flash('Пользователь с такой почтой уже существует')
                     return redirect(url_for('so_registration'))
                 else:
-                    if request.form['password'] and request.form['repeat_password']:
-                        if request.form['password'] != request.form['repeat_password']:
-                            flash('Введённые пароли не совпадают')
-                            return redirect(url_for('so_registration'))
-                        else:
-                            password = generate_password_hash(request.form['password'])
-                            new_sport_object = SportObject(email=email, password=password, user_type='sport_object')
-                            db.session.add(new_sport_object)
-                            db.session.commit()
-                            flash('Вы успешно зарегистрировались.')
-                            return redirect(url_for('start_page'))
-                    else:
-                        flash('Введите пароль')
+                    if form.password.data != form.confirm_password.data:
+                        flash('Введённые пароли не совпадают')
                         return redirect(url_for('so_registration'))
-            else:
-                flash('Введите почту')
-                return redirect(url_for('so_registration'))
-        return render_template('so_registration_page.html')
+                    else:
+                        password = generate_password_hash(form.password.data)
+                        new_sport_object = SportObject(email=email, password=password, user_type='sport_object')
+                        db.session.add(new_sport_object)
+                        db.session.commit()
+                        flash('Вы успешно зарегистрировались.')
+                        return redirect(url_for('start_page'))
+        return render_template('so_registration_page.html', form=form)
 
-    @app.route('/u_id<user_id>')
+    @app.route('/u_id<user_id>', methods=['GET', 'POST'])
     @login_required
     def user_page(user_id):
-        if User.query.filter(User.id == user_id).first().user_type == 'person':
-            user = Person.query.filter(Person.id == user_id).first_or_404()
-            return render_template(
-                'user_page.html',
-                user=user
-                )
-        else:
-            user = SportObject.query.filter(SportObject.id == user_id).first_or_404()
-            return render_template(
-                'so_user_page.html',
-                user=user
-                )
+        try:
+            if User.query.filter(User.id == user_id).first().user_type == 'person':
+                guest_friends_list = [friend[1] for friend in db.session.query(friends).filter(friends.c.sender_id == user_id)]
+                current_user_friends_list = [friend[1] for friend in db.session.query(friends).filter(friends.c.sender_id == current_user.id)]
+                if int(user_id) in current_user_friends_list:
+                    person_in_friends = True
+                else:
+                    person_in_friends = False
+                user = Person.query.filter(Person.id == user_id).first_or_404()
+                if request.method == 'POST':
+                    if request.form['add_friend_button']:
+                        if int(user_id) not in current_user_friends_list:
+                            flash('Пользователь добавлен в друзья')
+                            friend = Person.query.filter(Person.id == current_user.id).first()
+                            sender = Person.query.filter(Person.id == user_id).first()
+                            friend.followed.append(sender)
+                            db.session.commit()
+                return render_template(
+                    'user_page.html',
+                    user=user,
+                    friends_list=guest_friends_list,
+                    user_id=user_id,
+                    person_in_friends=person_in_friends
+                    )
+            else:
+                user = SportObject.query.filter(SportObject.id == user_id).first_or_404()
+                return render_template(
+                    'so_user_page.html',
+                    user=user
+                    )
+        except:
+            flash('Пользователя не существует')
+            return redirect(url_for('start_page'))
 
     @app.route('/settings', methods=['GET', 'POST'])
     @login_required
     def user_settings():
         if User.query.filter(User.id == current_user.id).first().user_type == 'person':
+            form = PersonSettingsForm()
             user = Person.query.filter(Person.id == current_user.id).first()
-            if request.method == 'POST':
-                user.name = request.form['name']
-                user.last_name = request.form['last_name']
-                if request.form['date_of_birth']:
+            if form.validate_on_submit():
+                user.name = form.name.data
+                user.last_name = form.last_name.data
+                if form.date_of_birth.data:
                     try:
-                        date = datetime.strptime(request.form['date_of_birth'], '%d.%m.%Y')
+                        date = datetime.strptime(form.date_of_birth.data, '%d.%m.%Y')
                         user.date_of_birth = date
                     except ValueError:
                         flash('Неверный формат даты')
-                user.country = request.form['country']
-                user.city = request.form['city']
+                user.country = form.country.data
+                user.city = form.city.data
                 db.session.commit()
                 flash('Изменения сохранены')
-            return render_template('user_settings.html', user=user)
+            return render_template('user_settings.html', user=user, form=form)
         else:
+            form = SportObjectSettingsForm()
             user = SportObject.query.filter(SportObject.id == current_user.id).first()
-            if request.method == 'POST':
-                user.name = request.form['name']
-                user.country = request.form['country']
-                user.city = request.form['city']
-                user.address = request.form['address']
-                user.phone = request.form['phone']
+            if form.validate_on_submit():
+                user.name = form.name.data
+                user.country = form.country.data
+                user.city = form.city.data
+                user.address = form.address.data
+                user.phone = form.phone.data
                 db.session.commit()
                 flash('Изменения сохранены')
-            return render_template('so_user_settings.html', user=user)
+            return render_template('so_user_settings.html', user=user, form=form)
+
+    @app.route('/u_id<user_id>/friends/', methods=['GET', 'POST'])
+    def person_friends(user_id):
+        friends_list = [user[1] for user in db.session.query(friends).filter(friends.c.sender_id == current_user.id)]
+        friends_email = []
+        for friend_id in friends_list:
+            friends_email.append(db.session.query(Person.email).filter(Person.id == friend_id).first()[0])
+        return render_template('friends.html', friends_email=friends_email, user_id=user_id)
 
     @app.route('/logout')
     @login_required
