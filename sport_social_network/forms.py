@@ -17,7 +17,7 @@ class SignUpForm(FlaskForm):
 
 
 class PersonSettingsForm(FlaskForm):
-    name = StringField('name')
+    name = StringField('name', validators=[DataRequired()])
     last_name = StringField('last_name')
     date_of_birth = StringField('date_of_birth')
     country = StringField('country')
@@ -26,7 +26,7 @@ class PersonSettingsForm(FlaskForm):
 
 
 class SportObjectSettingsForm(FlaskForm):
-    name = StringField('name')
+    name = StringField('name', validators=[DataRequired()])
     country = StringField('country')
     city = StringField('city')
     address = StringField('address')
