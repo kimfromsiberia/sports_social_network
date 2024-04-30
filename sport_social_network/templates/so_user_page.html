@@ -2,6 +2,15 @@
 
 {% block title %}Добро пожаловать!{% endblock %}
 {% block content %}
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-primary" role="alert">
+      {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 <div class="container">
   <div class="row">
     <p class="fs-3">
@@ -48,6 +57,20 @@
     <div class="col-5">
       <p class="fs-6">{{ user.phone }}</p>
   </div>
+  </div>
+  {% endif %}
+  {% if user_id != current_user.id and not subscription %}
+  <div class="row">
+    <form method="POST">
+    <input class="btn btn-primary" role="button" id="1" type="submit" name="submit" value="Подписаться">
+    </form>
+  </div>
+  {% endif %}
+  {% if user_id != current_user.id and not person_training_here %}
+  <div class="row">
+    <form method="POST">
+    <input class="btn btn-primary" role="button" id="2" type="submit" name="submit" value="Я тренируюсь здесь">
+    </form>
   </div>
   {% endif %}
 </div>
