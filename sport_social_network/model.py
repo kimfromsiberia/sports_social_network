@@ -12,6 +12,20 @@ friends = db.Table(
     )
 
 
+training_here = db.Table(
+    'training_here',
+    db.Column('person_id', db.Integer, db.ForeignKey('person.id'), primary_key=True),
+    db.Column('sport_object_id', db.Integer, db.ForeignKey('sport_object.id'), primary_key=True),
+    )
+
+
+subscriptions = db.Table(
+    'person_subscriptions',
+    db.Column('person_id', db.Integer, db.ForeignKey('person.id'), primary_key=True),
+    db.Column('sport_object_id', db.Integer, db.ForeignKey('sport_object.id'), primary_key=True),
+    )
+
+
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String, unique=True)
@@ -39,7 +53,7 @@ class Person(User):
     country = db.Column(db.String)
     city = db.Column(db.String)
     user = db.relationship('User', uselist=False, back_populates='person')
-    followed = db.relationship(
+    friendship = db.relationship(
         'Person',
         secondary=friends,
         primaryjoin=(friends.c.sender_id == id),
@@ -47,6 +61,14 @@ class Person(User):
         backref=db.backref('friends', lazy='dynamic'),
         lazy='dynamic'
         )
+    subscribe = db.relationship(
+        'SportObject',
+        secondary=subscriptions
+    )
+    training = db.relationship(
+        'SportObject',
+        secondary=training_here
+    )
 
     def __repr__(self):
         return f'<Person {self.id} {self.user.email}>'
@@ -63,4 +85,3 @@ class SportObject(User):
 
     def __repr__(self):
         return f'<Sport object {self.id} {self.user.email}>'
-

@@ -4,11 +4,28 @@ from flask_login import current_user, LoginManager, login_user, logout_user, log
 from werkzeug.security import generate_password_hash
 
 from sport_social_network.forms import SignInForm, SignUpForm, PersonSettingsForm, SportObjectSettingsForm
-from sport_social_network.model import db, User, Person, SportObject, friends
+from sport_social_network.model import (
+                                        db,
+                                        User,
+                                        Person,
+                                        SportObject,
+                                        friends,
+                                        subscriptions,
+                                        training_here,
+                                        )
 from sport_social_network.units import (get_guest_friends_list,
                                         get_current_user_friends_list,
                                         check_person_in_friends,
                                         add_user_in_friends,
+                                        get_subscriptions_list,
+                                        get_guest_subscriber_list,
+                                        get_training_here_list,
+                                        check_subscription,
+                                        subscribe_to,
+                                        get_training_places_list,
+                                        get_persons_training_here_list,
+                                        check_person_training_here,
+                                        add_to_training_places,
                                         )
 
 
@@ -37,18 +54,6 @@ def create_app():
             user = User.query.filter(User.email == form.email.data).first()
             if user and user.check_password(form.password.data):
                 login_user(user)
-                if user.user_type == 'person':
-                    if Person.query.filter(Person.id == user.id).first().name:
-                        return redirect(url_for('user_page', user_id=user.id))
-                    else:
-                        flash('Заполните свои данные')
-                        return redirect(url_for('user_settings', user_id=user.id))
-                else:
-                    if SportObject.query.filter(SportObject.id == user.id).first().name:
-                        return redirect(url_for('user_page', user_id=user.id))
-                    else:
-                        flash('Заполните свои данные')
-                        return redirect(url_for('user_settings', user_id=user.id))
                 if user.user_type == 'person':
                     if Person.query.filter(Person.id == user.id).first().name:
                         return redirect(url_for('user_page', user_id=user.id))
@@ -120,6 +125,8 @@ def create_app():
                 guest_friends_list = get_guest_friends_list(friends, user_id)
                 current_user_friends_list = get_current_user_friends_list(friends, current_user)
                 person_in_friends = check_person_in_friends(user_id, current_user_friends_list)
+                current_user_subscriptions_list = get_subscriptions_list(subscriptions, current_user)
+                current_user_training_places_list = get_training_places_list(training_here, current_user)
                 if request.method == 'POST':
                     if request.form['add_friend_button']:
                         person_in_friends = True
@@ -129,13 +136,38 @@ def create_app():
                     user=user,
                     friends_list=guest_friends_list,
                     user_id=user_id,
-                    person_in_friends=person_in_friends
+                    person_in_friends=person_in_friends,
+                    current_user_subscriptions_list=current_user_subscriptions_list,
+                    current_user_training_places_list=current_user_training_places_list,
                     )
             else:
                 user = SportObject.query.filter(SportObject.id == user_id).first()
+                guest_subscriber_list = get_guest_subscriber_list(subscriptions, user_id)
+                current_user_subscriptions_list = get_subscriptions_list(subscriptions, current_user)
+                training_here_list = get_training_here_list(training_here, user_id)
+                subscription = check_subscription(user_id, current_user_subscriptions_list)
+                current_user_training_places_list = get_training_places_list(training_here, current_user)
+                persons_training_here_list = get_persons_training_here_list(training_here, user_id)
+                person_training_here = check_person_training_here(user_id, current_user_training_places_list)
+                if request.method == 'POST':
+                    if request.form['submit'] == 'Подписаться':
+                        subscription = True
+                        flash(subscribe_to(user_id, current_user, current_user_subscriptions_list))
+                    elif request.form['submit'] == 'Я тренируюсь здесь':
+                        person_training_here = True
+                        flash(add_to_training_places(user_id, current_user, current_user_training_places_list))
+                    else:
+                        None
                 return render_template(
                     'so_user_page.html',
-                    user=user
+                    user=user,
+                    user_id=int(user_id),
+                    subscription=subscription,
+                    current_user_subscriptions_list=current_user_subscriptions_list,
+                    guest_subscriber_list=guest_subscriber_list,
+                    training_here_list=training_here_list,
+                    persons_training_here_list=persons_training_here_list,
+                    person_training_here=person_training_here,
                     )
         except AttributeError:
             flash('Пользователя не существует')
@@ -181,6 +213,38 @@ def create_app():
         for friend_id in friends_list:
             friends_email.append(db.session.query(Person.email).filter(Person.id == friend_id).first()[0])
         return render_template('friends.html', friends_email=friends_email, user_id=user_id)
+
+    @app.route('/u_id<user_id>/subscriptions/', methods=['GET', 'POST'])
+    def person_subscriptions(user_id):
+        subscriptions_list = get_subscriptions_list(subscriptions, current_user)
+        sport_object_emails = []
+        for sport_object_id in subscriptions_list:
+            sport_object_emails.append(db.session.query(SportObject.email).filter(SportObject.id == sport_object_id).first()[0])
+        return render_template('subscriptions.html', sport_object_emails=sport_object_emails, user_id=user_id)
+
+    @app.route('/u_id<user_id>/training_here/', methods=['GET', 'POST'])
+    def training(user_id):
+        training_places_list = get_training_places_list(training_here, current_user)
+        sport_object_emails = []
+        for sport_object_id in training_places_list:
+            sport_object_emails.append(db.session.query(SportObject.email).filter(SportObject.id == sport_object_id).first()[0])
+        return render_template('training_here.html', sport_object_emails=sport_object_emails, user_id=user_id)
+
+    @app.route('/u_id<user_id>/subscribers/', methods=['GET', 'POST'])
+    def subscribers(user_id):
+        subscribers_list = get_guest_subscriber_list(subscriptions, user_id)
+        person_emails = []
+        for person_id in subscribers_list:
+            person_emails.append(db.session.query(Person.email).filter(Person.id == person_id).first()[0])
+        return render_template('subscribers.html', person_emails=person_emails, user_id=user_id)
+
+    @app.route('/u_id<user_id>/training_persons/', methods=['GET', 'POST'])
+    def training_persons(user_id):
+        training_here_list = get_training_here_list(training_here, user_id)
+        person_emails = []
+        for person_id in training_here_list:
+            person_emails.append(db.session.query(Person.email).filter(Person.id == person_id).first()[0])
+        return render_template('training_persons.html', person_emails=person_emails, user_id=user_id)
 
     @app.route('/logout')
     @login_required

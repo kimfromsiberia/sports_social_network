@@ -52,7 +52,7 @@
   </div>
   </div>
   {% endif %}
-  {% if user.id != current_user.id and not person_in_friends %}
+  {% if user.id != current_user.id and not person_in_friends and current_user.user_type == 'person' %}
     <div class="row">
       <form method="POST">
       <input class="btn btn-primary" role="button" id="1" type="submit" name="add_friend_button" value="Добавить в друзья">
